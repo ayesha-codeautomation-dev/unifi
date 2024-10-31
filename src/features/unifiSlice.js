@@ -7,13 +7,13 @@ export const authenticateUser = createAsyncThunk(
   async ({ controllerUrl, username, password }, { rejectWithValue }) => {
     try {
       const response = await axios.post(
-        "https://portal.captifi.io/unifi/login",
+        "http://localhost:5000/unifi/login",
         { controllerUrl, username, password },
         { headers: { "Content-Type": "application/json" } }
       );
-      return response.data; // returns the session cookie if successful
+      return { session: response.data, controllerUrl }; // Return session and controllerUrl
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Login failed. Please try again.");
     }
   }
 );
@@ -22,11 +22,11 @@ export const authenticateUser = createAsyncThunk(
 export const fetchSites = createAsyncThunk(
   "unifi/fetchSites",
   async (_, { getState, rejectWithValue }) => {
-    const { session } = getState().unifi;
+    const { session, controllerUrl } = getState().unifi;
     try {
       const response = await axios.post(
-        "https://portal.captifi.io/unifi/user/sites",
-        { controllerUrl: "https://unifi.netviva.co.uk:8443" },
+        "http://localhost:5000/unifi/user/sites",
+        { controllerUrl },
         {
           headers: {
             "Content-Type": "application/json",
@@ -36,7 +36,7 @@ export const fetchSites = createAsyncThunk(
       );
       return response.data; // list of sites
     } catch (error) {
-      return rejectWithValue(error.response.data);
+      return rejectWithValue(error.response?.data || "Failed to fetch sites.");
     }
   }
 );
@@ -45,6 +45,7 @@ const unifiSlice = createSlice({
   name: "unifi",
   initialState: {
     session: null,
+    controllerUrl: null, // Save controllerUrl in state
     sites: [],
     loading: false,
     error: null,
@@ -58,16 +59,23 @@ const unifiSlice = createSlice({
       })
       .addCase(authenticateUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.session = action.payload; // store the session
+        state.session = action.payload.session; // store the session
+        state.controllerUrl = action.payload.controllerUrl; // store the controllerUrl
       })
       .addCase(authenticateUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       })
+      .addCase(fetchSites.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchSites.fulfilled, (state, action) => {
+        state.loading = false;
         state.sites = action.payload; // store sites
       })
       .addCase(fetchSites.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   },

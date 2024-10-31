@@ -42,8 +42,7 @@
   margin-bottom: 0.5rem;
 }
 
-/* Input fields styling */
-.input-field {
+.input-field, .select {
   width: 91%;
   padding: 0.6rem 1rem;
   margin-bottom: 2rem;
@@ -53,8 +52,18 @@
   font-size: 0.95rem;
   transition: border-color 0.3s, box-shadow 0.3s;
 }
+.select {
+  width: 100%;
+  padding: 0.6rem 1rem;
+  margin-bottom: 2rem;
+  border: 1px solid #cbd5e0; /* Light gray border */
+  border-radius: 5px;
+  background-color: #f7fafc; /* Light background for input */
+  font-size: 0.95rem;
+  transition: border-color 0.3s, box-shadow 0.3s;
+}
 
-.input-field:focus {
+.input-field:focus, .select:focus {
   outline: none;
   border-color: #d01760; /* Pink border on focus */
   box-shadow: 0 0 0 3px rgba(208, 23, 96, 0.3); /* Subtle pink shadow */
@@ -85,6 +94,7 @@
   cursor: not-allowed;
   opacity: 0.8;
 }
+
 
 /* Error message styling */
 .error-message {
